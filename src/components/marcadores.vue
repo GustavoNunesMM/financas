@@ -1,8 +1,8 @@
 <template>
     <div class="bg-white w-[400px]">
-        <button class="w-full" @click="alterarMarcador">{{ marcadorSelecionado }}</button>
-        <div v-if="marcador">
-            <div v-for="(marcador, index) in marcadoresFiltrados" :key="index" @click="selecionarMarcador(index)">
+        <button class="w-full" @click="chamarAlterarMarcador">{{ marcadorSelecionado }}</button>
+        <div v-if="selecionarMarcador && index === editando">
+            <div v-for="(marcador, index) in marcadoresFiltrados" :key="index" @click="chamarselecionarMarcador(index)">
                 {{marcador}}
             </div>
             <input type="text" v-model="filtroMarcadores" >
@@ -12,49 +12,57 @@
 </template>
 
 <script lang="ts">
-import {reactive, ref, watch} from 'vue'
+import {watch} from 'vue'
+import { useMarcadorStore } from '../stores/marcador'
+import { storeToRefs } from 'pinia'
+import { useItensStore } from '../stores/itens'
 
 export default{
-setup(_, {emit}) {
-    const marcador = ref<boolean>(false)
-    const marcadores = reactive<string[]>(['Marcador 1', 'Marcador 2', 'Marcador 3'])
-    const filtroMarcadores = ref<string>('')
-    const marcadoresFiltrados = reactive<string[]>([...marcadores])
-    const marcadorSelecionado = ref<string>('Marcadores')
+    props:{
+        index: {
+            type: Number,
+            required: true
+        }
+    },
+    setup(props) {
+    const index = props.index
 
-    watch(filtroMarcadores, (value) => {
-        if (value !== '') {
-            marcadoresFiltrados.length = 0
-            marcadores.forEach((marcador) => {
-            if(marcador.includes(value)) {
-                marcadoresFiltrados.push(marcador)
-            }
+    const marcadorStore = useMarcadorStore()
+    const {marcadores, filtroMarcadores, marcadoresFiltrados} = storeToRefs(marcadorStore)
+
+    const itensStore = useItensStore()
+    const {editando, selecionarMarcador, marcadorSelecionado} = storeToRefs(itensStore)
+    
+    
+    marcadorStore.filtrarMarcador()
+    
+        watch(filtroMarcadores, (value) => {
+        // Limpa o array de marcadores filtrados
+        marcadoresFiltrados.value = [];
+        // Filtra os marcadores com base no valor do filtro
+        value? marcadoresFiltrados.value = marcadores.value.filter((marcador) => marcador.includes(value)) 
+        : marcadoresFiltrados.value = [...marcadores.value]
         })
-        } else {
-            marcadoresFiltrados.length = 0
-            marcadores.forEach((marcador) => {
-                marcadoresFiltrados.push(marcador)
-            })
-        }
-        
-    })
 
-    const alterarMarcador = () => {
-        marcador.value = !marcador.value
+    const chamarAlterarMarcador = () => {
+        index === editando.value ? itensStore.alterarMarcador() : null
         }
-    const selecionarMarcador = (index:number) => {
-        alterarMarcador()
-        marcadorSelecionado.value = marcadores[index]
-        emit('selecionarMarcador', marcadores[index] as string)
-    }
+
+    const chamarselecionarMarcador = (index:number) => {
+        const novoMarcador = marcadores.value[index]
+        itensStore.selecionarMarcadorLista(novoMarcador)
+        }
+
     return {
-        marcador,
+        editando,
+        index,
         marcadores,
         filtroMarcadores,
         marcadorSelecionado,
+        selecionarMarcador,
         marcadoresFiltrados,
-        alterarMarcador,
-        selecionarMarcador
+        chamarAlterarMarcador,
+        chamarselecionarMarcador
         }
     }
 }

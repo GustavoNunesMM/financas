@@ -8,5 +8,4 @@ export function formatarValor(num: string):{valorNumerico:number, valorFormatado
     return {
         valorNumerico, valorFormatado
     }
-
 }
