@@ -1,6 +1,6 @@
 <template>
-    <div v-if="itens.length > 0" class="flex text-black flex-col items-center bg-white w-full h-[500px]">
-        <div v-for="(item, index) in itens" :key="index" class="bg-gray-200 p-2 m-2 flex flex-row">
+    <div v-if="itensAgrupadosMes.length > 0" class="flex text-black flex-col items-center bg-white w-full h-[500px]">
+        <div v-for="(item, index) in itensAgrupadosMes" :key="index" class="bg-gray-200 p-2 m-2 flex flex-row">
             <div>
                 <input type="text" placeholder="nome" v-model="item.nome" :disabled="index !== editando">
                 <input type="text" placeholder="valor" @input="formatarValorNumerico" v-model="item.valor" :disabled="index !== editando">
@@ -25,15 +25,15 @@ export default{
     },
     setup() {
         const itensStore = useItensStore()
-        const {itens, editando} = storeToRefs(itensStore)
+        const {itensAgrupadosMes, editando} = storeToRefs(itensStore)
 
         const chamarEdicao = (index: number) => { itensStore.editar(index) }
 
         function formatarValorNumerico(event:Event) {
             const input= (event.target as HTMLInputElement).value
             const response = itensStore.formatarValor(input)
-            itens.value[editando.value] = {
-                ...itens.value[editando.value],
+            itensAgrupadosMes.value[editando.value] = {
+                ...itensAgrupadosMes.value[editando.value],
                 valor: response.valorFormatado,
                 valorNumerico: response.valorNumerico
             }
@@ -42,7 +42,7 @@ export default{
         const chamarRemover = (index:number) => itensStore.remover(index)
 
 
-        return {itens,editando,chamarEdicao, chamarRemover, formatarValorNumerico}
+        return {itensAgrupadosMes,editando,chamarEdicao, chamarRemover, formatarValorNumerico}
 }
 }
 </script>

@@ -24,6 +24,14 @@ export interface itensState {
   marcadorSelecionado: string,
   editando: number,
   tipoGasto: tipoGasto,
+  meses: string[],
+  mesSelecionado: {
+    index: number,
+    nome: string
+  },
+  itensAgrupadosMes: itensInterface[],
+  anos: string[],
+  anoSelecionado: string,
 }
 
 export const useItensStore = defineStore('counter',  {
@@ -37,6 +45,11 @@ export const useItensStore = defineStore('counter',  {
       marcadorSelecionado: 'Marcador',
       editando: (-1),
       tipoGasto: 0,
+      meses: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'],
+      mesSelecionado: {index: 0, nome: 'Janeiro'},
+      itensAgrupadosMes: [],
+      anos: ['2020', '2021', '2022', '2023', '2024', '2025', '2026', '2027', '2028', '2029', '2030'],
+      anoSelecionado: new Date().getFullYear().toString()
     }),
     actions: {
       adicionarValor() {
@@ -71,6 +84,7 @@ export const useItensStore = defineStore('counter',  {
       },
       remover (index: number) {
         this.itens.splice(index, 1)
+        this.editando = -1
       },
 
       selecionarMarcadorLista(marcador:string) {
@@ -86,6 +100,30 @@ export const useItensStore = defineStore('counter',  {
         const keyEnum = Object.keys(tipoGasto).filter(key => isNaN(Number(key)))
         this.tipoGasto = (this.tipoGasto + 1) % keyEnum.length // Avança para o próximo índice
       },
+      selecionarMes(index: number) {
+        this.agruparItensMes(index)
+        this.mesSelecionado = {index: index, nome: this.meses[index]}
+      },
+      agruparItensMes(indexMes:number) {
+        console.log(indexMes, this.mesSelecionado.index)
+        if(indexMes === -1 || indexMes === this.mesSelecionado.index) {
+          this.itensAgrupadosMes = this.itens
+          return
+        }
+        let indexCorrigido:string = (indexMes + 1).toString()
+        indexCorrigido.length < 2 ? indexCorrigido = `0${indexCorrigido}` : indexCorrigido
+        const itens = this.itens.filter(item => {
+          const [ano, mes, dia] = item.data.split('-')
+          console.log('ano:', ano, 'anoSelecionado:',this.anoSelecionado, 'mes:', mes, 'indexCorrigido:', indexCorrigido)
+          const condicao:boolean = mes == indexCorrigido && ano == this.anoSelecionado
+          return condicao
+        })
+        console.log('itens:',itens)
+        this.itensAgrupadosMes = itens
+      },
+      selecionarAno(ano: string) {
+        this.anoSelecionado = ano
+      }
 
   },
     getters: {
@@ -99,7 +137,6 @@ export const useItensStore = defineStore('counter',  {
           acc[item.marcador] ? acc[item.marcador] += item.valor : acc[item.marcador] = item.valor
           return acc
       },{})
-
-    },
+      },
   }
 })

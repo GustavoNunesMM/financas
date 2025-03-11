@@ -3,6 +3,7 @@
     <entrada class="w-full" />
     <lista class="w-full bg-gray-400"/>
     <apresentacaoDados/> 
+    <mensal/>
   </div>
 
 </template>
@@ -11,9 +12,10 @@
 import entrada from './components/entrada.vue'
 import lista from './components/listados.vue'
 import apresentacaoDados from './components/apresentacaoDados.vue'
+import mensal from './components/mensal.vue'
 
 export default {
-  components: { entrada, lista, apresentacaoDados },
+  components: { entrada, lista, apresentacaoDados, mensal },
   setup() {    
   }
 }
